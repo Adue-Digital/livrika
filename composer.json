@@ -1,0 +1,28 @@
+{
+  "name": "adue/wordpress-plugin",
+  "description": "A small plugin that use WordPress Base Plugin package.",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Adue\\WordPressPlugin\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Adue"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "adue/wordpress-base-plugin": "*",
+    "php-di/php-di": "dev-master",
+    "hassankhan/config": "*"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../../../../wordpress-base-plugin"
+    }
+  ]
+}

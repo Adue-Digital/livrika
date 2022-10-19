@@ -15,14 +15,6 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "adue/wordpress-base-plugin": "*",
-    "php-di/php-di": "dev-master",
-    "hassankhan/config": "*"
-  },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../../../../wordpress-base-plugin"
-    }
-  ]
+    "adue/wordpress-base-plugin": "*"
+  }
 }

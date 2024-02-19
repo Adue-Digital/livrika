@@ -20,8 +20,8 @@
   },
   "repositories": [
     {
-      "type": "path",
-      "url": "../../../../wordpress-base-plugin"
+      "type": "vcs",
+      "url": "https://github.com/Adue-Digital/wordpress-base-plugin"
     }
   ]
 }

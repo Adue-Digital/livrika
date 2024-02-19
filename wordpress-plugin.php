@@ -8,6 +8,7 @@ Author URI: https://adue.digital
  */
 
 use Adue\WordPressPlugin\Plugin;
+use DI\ContainerBuilder;
 use Noodlehaus\Config;
 
 require 'vendor/autoload.php';
@@ -22,7 +23,13 @@ class WordPressPlugin
         static $instance;
         if (! $instance) {
             $instance = new self();
-            $instance->plugin = new Plugin();
+
+            $containerBuilder = new ContainerBuilder();
+            $containerBuilder->addDefinitions(__DIR__.'/config/di_definitions.php');
+
+            $container = $containerBuilder->build();
+
+            $instance->plugin = new Plugin($container);
             $instance->run();
         }
         return $instance;

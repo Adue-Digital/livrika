@@ -2,11 +2,12 @@
 
 namespace Adue\WordPressPlugin;
 
+use Adue\WordPressBasePlugin\Base\Loader;
 use Adue\WordPressBasePlugin\BasePlugin;
-use Adue\WordPressPlugin\Admin\CustomOption;
-use Adue\WordPressPlugin\Admin\CustomSubmenuPage;
-use Adue\WordPressPlugin\PostTypes\BookPostType;
 use Adue\WordPressPlugin\Admin\CustomMenuPage;
+use DI\DependencyException;
+use DI\NotFoundException;
+use function DI\create;
 
 class Plugin extends BasePlugin
 {
@@ -15,7 +16,16 @@ class Plugin extends BasePlugin
 
     public function init()
     {
-        //Make some awesome
+        $menuPages = $this->getContainer()->get(
+            CustomMenuPage::class,
+        );
+        $menuPages->add();
+    }
+
+    public function run()
+    {
+        $loader = $this->getContainer()->get(Loader::class);
+        $loader->run();
     }
 
 }

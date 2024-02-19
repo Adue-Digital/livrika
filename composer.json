@@ -15,6 +15,13 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "adue/wordpress-base-plugin": "*"
-  }
+    "adue/wordpress-base-plugin": "*",
+    "php-di/php-di": "^7.0"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../../../../wordpress-base-plugin"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 <?php
 
-use Adue\WordPressPlugin\Admin\CustomMenuPage;
+use Adue\WordPressPlugin\Admin\Test1Page;
 use Psr\Container\ContainerInterface;
 
 require __DIR__.'/../vendor/autoload.php';

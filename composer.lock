@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../../../wordpress-base-plugin",
-                "reference": "07737fde80faaaede74a6dc94d804613acc35ab6"
+                "reference": "5cc6a8fce144d04122b64786df5f8788711c29bc"
             },
             "require": {
                 "hassankhan/config": "*",

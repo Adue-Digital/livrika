@@ -6,7 +6,7 @@ use Psr\Container\ContainerInterface;
 require __DIR__.'/../vendor/autoload.php';
 
 return [
-    'plugin_name' => 'WordPress Base Plugin',
+    'plugin_name' => 'Livrika Picking Points',
     'plugin_version' => '0.0.1',
     'base_view_path' => __DIR__.'/../resources/views',
 

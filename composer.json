@@ -5,7 +5,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Adue\\WordPressPlugin\\": "src/"
+      "Adue\\LivrikaPickingPoints\\": "src/"
     }
   },
   "authors": [
@@ -16,7 +16,8 @@
   "minimum-stability": "dev",
   "require": {
     "adue/wordpress-base-plugin": "*",
-    "php-di/php-di": "^7.0"
+    "php-di/php-di": "^7.0",
+    "spipu/html2pdf": "dev-master"
   },
   "repositories": [
     {

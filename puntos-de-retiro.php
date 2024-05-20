@@ -1,19 +1,19 @@
 <?php
 /*
-Plugin Name:  WordPress Plugin
-Description:  A small plugin that use WordPress Base Plugin package.
+Plugin Name:  Livrika Puntos de Retiro
+Description:  Provee la funcionalidad de puntos de retiro para Dokan
 Version:      0.0.1
 Author: Marcio Fuentes
 Author URI: https://adue.digital
  */
 
-use Adue\WordPressPlugin\Plugin;
+use Adue\LivrikaPickingPoints\Plugin;
 use DI\ContainerBuilder;
 use Noodlehaus\Config;
 
 require 'vendor/autoload.php';
 
-class WordPressPlugin
+class PickingPoints
 {
 
     public $plugin;
@@ -25,6 +25,7 @@ class WordPressPlugin
             $instance = new self();
 
             $containerBuilder = new ContainerBuilder();
+            $containerBuilder->useAttributes(true);
             $containerBuilder->addDefinitions(__DIR__.'/config/di_definitions.php');
 
             $container = $containerBuilder->build();
@@ -43,4 +44,4 @@ class WordPressPlugin
 
 }
 
-class_exists(WordPressPlugin::class) && WordPressPlugin::instance();
+class_exists(PickingPoints::class) && PickingPoints::instance();

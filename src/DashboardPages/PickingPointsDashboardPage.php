@@ -57,10 +57,8 @@ class PickingPointsDashboardPage
             if(isset($_POST['remove_picking_point']) && $_POST['remove_picking_point'])
                 $this->removePickingPoint($_POST['picking_point_id']);
 
-            $pickingPoints = get_posts([
-                'posts_per_page' => -1,
-                'post_type'      => 'picking_point',
-            ]);
+            $pickingPoints = $this->getPickingPoints();
+
             $activeTab = isset($_GET['tab']) && in_array($_GET['tab'], ['picking-points-list', 'my-picking-points']) ? $_GET['tab'] : 'picking-points-list';
             $this->view()->set('activeTab', $activeTab);
 
@@ -96,6 +94,54 @@ class PickingPointsDashboardPage
             $this->view()->set('pickingPoints', $pickingPoints);
             $this->view()->render('vendor/dashboard/picking-points');
         }
+    }
+
+    private function getPickingPoints()
+    {
+        $args = [
+            'posts_per_page' => -1,
+            'post_type'      => 'picking_point',
+        ];
+
+        $metaQuery = [
+            'relation' => 'AND',
+        ];
+
+        $hasMeta = false;
+        if(!empty($_GET['provincia']) && $_GET['provincia'] != 'all') {
+            $metaQuery[] = [
+                'key' => 'provincia',
+                'value' => $_GET['provincia'],
+                'compare' => 'LIKE',
+            ];
+            $hasMeta = true;
+        }
+        if(!empty($_GET['codigo_postal'])) {
+            $metaQuery[] = [
+                'key' => 'codigo_postal',
+                'value' => $_GET['codigo_postal'],
+                'compare' => '=',
+            ];
+            $hasMeta = true;
+        }
+        if(!empty($_GET['nombre'])) {
+            /*$metaQuery[] = [
+                'key' => 'nombre',
+                'value' => "%".$_GET['nombre']."%",
+                'compare' => 'LIKE',
+            ];*/
+            $args['s'] = $_GET['nombre'];
+            //$hasMeta = true;
+        }
+
+        if($hasMeta) {
+            $args['meta_query'] = $metaQuery;
+        }
+
+        /*echo "<pre>";
+        var_dump($args);die;*/
+
+        return get_posts($args);
     }
 
     private function getVendorPickingPoint($pickingPointId)

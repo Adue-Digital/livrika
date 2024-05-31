@@ -1,0 +1,21 @@
+{
+    "name": "adue/wordpress-base-plugin",
+    "description": "A basic skeleton for build WordPress plugins",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Adue\\WordPressBasePlugin\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Adue"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "hassankhan/config": "*",
+        "php-di/php-di": "^7.0"
+    }
+}

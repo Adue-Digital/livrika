@@ -4,11 +4,16 @@ namespace Adue\LivrikaPickingPoints;
 
 use Adue\LivrikaPickingPoints\DashboardPages\PickingPointsDashboardPage;
 use Adue\LivrikaPickingPoints\DashboardPages\PrintTrackingCodesDashboardPage;
+use Adue\LivrikaPickingPoints\Notifications\WcDelivered\WcDeliveredNotificationToClient;
+use Adue\LivrikaPickingPoints\Notifications\WcDelivered\WcDeliveredNotificationToVendor;
+use Adue\LivrikaPickingPoints\Notifications\WcWithdrawn\WcWithdrawnNotificationToClient;
+use Adue\LivrikaPickingPoints\Notifications\WcWithdrawn\WcWithdrawnNotificationToVendor;
 use Adue\LivrikaPickingPoints\Overrides\VendorShipping;
 use Adue\LivrikaPickingPoints\PostTypes\PickingPointPostType;
 use Adue\LivrikaPickingPoints\PostTypes\VendorPickingPointPostType;
 use Adue\LivrikaPickingPoints\Roles\PickingPointRole;
 use Adue\LivrikaPickingPoints\ShippingMethods\PickingPointsShippingMethod;
+use Adue\LivrikaPickingPoints\Shortcodes\ChangeOrderStatus;
 use Adue\WordPressBasePlugin\Base\Loader;
 use Adue\WordPressBasePlugin\BasePlugin;
 use Adue\WordPressBasePlugin\Modules\Views\Assets;
@@ -38,6 +43,9 @@ class Plugin extends BasePlugin
         $role = new PickingPointRole();
         $role->register();
 
+        $changeOrderStatusShortcode = $this->getContainer()->get(ChangeOrderStatus::class);
+        $changeOrderStatusShortcode->add();
+
         add_filter( 'woocommerce_shipping_methods', [$this, 'livrika_picking_points'] );
         add_action( 'woocommerce_shipping_init', [$this, 'livrika_picking_points_init'] );
 
@@ -45,9 +53,12 @@ class Plugin extends BasePlugin
 
         add_action( 'init', [ $this, 'register_custom_statuses'] );
         add_filter( 'wc_order_statuses', [ $this, 'add_ongoing_to_order_statuses'] );
+        add_filter( 'dokan_get_order_status_class', [ $this, 'dokan_add_custom_order_status_button_class'], 10, 2 );
+        add_filter( 'dokan_get_order_status_translated', [ $this, 'dokan_add_custom_order_status_translated'], 10, 2 );
 
         add_action('woocommerce_checkout_create_order',  [ $this, 'save_branch_office_code'] , 20, 2);
         add_action('dokan_checkout_update_order_meta',  [ $this, 'save_livrika_picking_point'] , 20);
+        add_filter( 'woocommerce_email_classes', [ $this, 'register_livrika_emails'], 90, 1 );
 
     }
 
@@ -139,12 +150,47 @@ class Plugin extends BasePlugin
         foreach ( $order_statuses as $key => $status ) {
             $new_order_statuses[ $key ] = $status;
             if ( 'wc-completed' === $key ) {
-                $new_order_statuses['wc-ongoing'] = 'En camino';
-                $new_order_statuses['wc-delivered'] = 'En destino';
-                $new_order_statuses['wc-withdrawn'] = 'Retirado';
+                $new_order_statuses['wc-ongoing'] = 'En camino a punto de retiro';
+                $new_order_statuses['wc-delivered'] = 'Llegado a punto de retiro';
+                $new_order_statuses['wc-withdrawn'] = 'Retirado por el cliente';
             }
         }
         return $new_order_statuses;
+    }
+
+    public function dokan_add_custom_order_status_button_class($text, $status)
+    {
+        switch ( $status ) {
+            case 'wc-ongoing':
+            case 'wc-delivered':
+            case 'ongoing':
+            case 'delivered':
+                $text = 'info';
+                break;
+            case 'wc-withdrawn':
+            case 'withdrawn':
+                $text = 'success';
+                break;
+        }
+        return $text;
+    }
+
+    public function dokan_add_custom_order_status_translated( $text, $status ) {
+        switch ( $status ) {
+            case 'wc-ongoing':
+            case 'ongoing':
+                $text = __( 'En camino', 'text_domain' );
+                break;
+            case 'wc-delivered':
+            case 'delivered':
+                $text = __( 'Llegado a punto de retiro', 'text_domain' );
+                break;
+            case 'wc-withdrawn':
+            case 'withdrawn':
+                $text = __( 'Retirado por el cliente', 'text_domain' );
+                break;
+        }
+        return $text;
     }
 
     function save_branch_office_code( $order, $data ) {
@@ -185,6 +231,14 @@ class Plugin extends BasePlugin
                 $order->save();
             }
         }
+    }
+
+    public function register_livrika_emails( $emails ) {
+        $emails['WC_Delivered'] = new WcDeliveredNotificationToClient();
+        $emails['WC_Delivered_To_Admin'] = new WcDeliveredNotificationToVendor();
+        $emails['WC_Withdrawn'] = new WcWithdrawnNotificationToClient();
+        $emails['WC_Withdrawn_To_Vendor'] = new WcWithdrawnNotificationToVendor();
+        return $emails;
     }
 
     public function run()

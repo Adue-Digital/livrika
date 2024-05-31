@@ -7,6 +7,7 @@ use Adue\WordPressBasePlugin\Traits\ViewTrait;
 use Spipu\Html2Pdf\Exception\ExceptionFormatter;
 use Spipu\Html2Pdf\Exception\Html2PdfException;
 use Spipu\Html2Pdf\Html2Pdf;
+use WC_Order;
 
 class PrintTrackingCodesDashboardPage
 {
@@ -37,21 +38,32 @@ class PrintTrackingCodesDashboardPage
                     <h1>Códigos para seguimiento</h1>
 
 
-                    <?php foreach ($_POST['orders'] as $orderId) : ?>
+                    <table class="page_header">
+                        <?php $x = 0; ?>
+                        <?php foreach ($_POST['orders'] as $orderId) : ?>
 
-                        <div style="text-align: center;width: 25%;display: inline-block">
-                            <qrcode value="<?php echo site_url(); ?>/livrika-track-order?order_id=<?php echo $orderId; ?>" ec="H" style="width: 50mm;"></qrcode>
-                            #<?php echo $orderId; ?>
-                        </div>
+                            <?php if ($x % 4 == 0) {echo "<tr>";} ?>
 
-                    <?php endforeach; ?>
+                            <td style="width: 25%; display:inline-block;text-align:center">
+                                <qrcode value="<?php echo site_url(); ?>/estado-de-orden?order_id=<?php echo $orderId; ?>" ec="H" style="width: 50mm;" label=""></qrcode><br>
+                                #<?php echo $orderId; ?>
+                            </td>
 
+                            <?php if ($x && ($x + 1) % 4 == 0) {echo "</tr>";} ?>
+
+                        <?php $x++; ?>
+                        <?php endforeach; ?>
+                        <?php for ($i = 0; $i < ($x % 4); $i++) : ?>
+                            <td></td>
+                        <?php endfor; ?>
+                        <?php if (($x + 1) % 4) {echo "</tr>";} ?>
+                    </table>
                 </page>
                 <?php
                 $content = ob_get_clean();
 
                 /*echo "<pre>";
-                var_dump($content);die;*/
+                var_dump(htmlspecialchars($content));die;*/
 
                 $html2pdf = new Html2Pdf('P', 'A4', 'fr');
                 $html2pdf->pdf->SetDisplayMode('fullpage');
@@ -99,20 +111,7 @@ class PrintTrackingCodesDashboardPage
     {
         if ( isset( $query_vars['tracking-qr-codes'] ) ) {
 
-            if(isset($_POST['generate_pdf']) && $_POST['generate_pdf']) {
-                var_dump($_POST);die;
-                $html2pdf = new Html2Pdf();
-
-                $html='
-                    <h1>HTML2PDF is easy</h1>
-                    <p>The HTML2PDF API makes it simple to convert web pages to PDF.</p>
-                    <p>It should be noted that specific tags must be implemented to use the html2pdf</p>
-                ';
-                $html2pdf->writeHTML($html);
-                $html2pdf->output();
-                exit;
-            }
-
+            $this->view()->set('orderStates', $this->getOrderStates());
             $this->view()->set('orders', $this->getPendingOrders());
             $this->view()->render('vendor/dashboard/tracking-qr-codes');
         }
@@ -120,7 +119,64 @@ class PrintTrackingCodesDashboardPage
 
     private function getPendingOrders()
     {
-        return dokan_get_seller_orders(dokan_get_current_user_id(), []);
+        //return dokan_get_seller_orders(dokan_get_current_user_id(), []);
+
+        if (!isset($_GET['fecha_desde'])) {
+            $dateFrom = date('Y-m-d', strtotime('1970-01-01'));
+        } else {
+            $dateFrom = $_GET['fecha_desde'];
+        }
+
+        if (!isset($_GET['fecha_hasta'])) {
+            $dateTo = date('Y-m-d');
+        } else {
+            $dateTo = $_GET['fecha_hasta'];
+        }
+
+        $metaQuery = [
+            [
+                'key' => '_dokan_vendor_id',
+                'value' => get_current_user_id(),
+                'compare' => 'LIKE',
+            ]
+        ];
+
+        $dateQuery = [
+            'after'     => $dateFrom." 00:00:00",
+            'before'    => $dateTo." 23:59:59",
+            'inclusive' => true,
+        ];
+
+        $args = [
+            'post_type'      => 'shop_order',
+            'posts_per_page' => -1,
+            'post_status'   => $_GET['estado'] ?? 'any',
+            'date_query'    => $dateQuery,
+            'meta_query'     => $metaQuery
+        ];
+
+        /*echo "<pre>";
+        var_dump($args);die;*/
+
+        return get_posts($args);
+    }
+
+    private function getOrderStates()
+    {
+
+        return [
+            "wc-pending" => 'Pendiente de pago',
+            "wc-processing" => 'Procesando',
+            "wc-on-hold" => 'En espera',
+            "wc-completed" => 'Completado',
+            "wc-ongoing" => 'En camino a punto de retiro',
+            "wc-delivered" => 'Llegado a punto de retiro',
+            "wc-withdrawn" => 'Retirado por el cliente',
+            "wc-cancelled" => 'Cancelled',
+            "wc-refunded" => 'Devuelto',
+            "wc-failed" => 'Falló',
+            "wc-checkout-draft" => 'Borrador',
+        ];
     }
 
 }

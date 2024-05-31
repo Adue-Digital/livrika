@@ -135,6 +135,8 @@ class PickingPointPostType extends BasePostType
     }
     public function afterInsertPost($postId, $post)
     {
+        add_filter( 'wp_mail_content_type','mail_set_content_type' );
+
         if($post->post_type !== $this->postType)
             return;
 
@@ -150,7 +152,20 @@ class PickingPointPostType extends BasePostType
             'role' => 'picking_point',
         );
         $userId = wp_insert_user( $user_data );
-        $results = retrieve_password( $email );
+        update_user_meta($userId, 'picking_point_id', $postId);
+
+        $subject = 'Se creó tu usuario en Livrika<br>';
+        $message = 'Se ha creado tu usuario de tipo Punto de Retiro<br>';
+        $message .= 'Podés ingresar a <a href="'.site_url().'" target="_blank">'.site_url().'</a> con los siguientes datos<br>';
+        $message .= 'Usuario: '.$email.'<br>';
+        $message .= 'Contraseña: '.$password.'<br>';
+        $message .= 'Te recomendamos modificar tu contraseña la primera vez que ingreses al sistema por motivos de seguridad';
+
+        wp_mail($email, $subject, $message,
+            [
+                'Content-Type' => 'text/html; charset=UTF-8',
+            ]
+        );
     }
 
     public function registerPrePostUpdate()

@@ -205,7 +205,11 @@ class VendorShipping extends VendorShippingMethod {
                 foreach ($pickingPoints as $pickingPoint) {
                     $rates[] = array(
                         'id'          => $this->get_method_rate_id( $method )."-".$pickingPoint->ID,
-                        'label'       => $method['title'].": ".$pickingPoint->post_title." (".rwmb_get_value( 'direccion', [], $pickingPoint->ID ).")",
+                        'label'       => $method['title'].": ".$pickingPoint->post_title . " - " .
+                            rwmb_get_value( 'direccion', [], $pickingPoint->ID ) . ", " .
+                            rwmb_get_value( 'ciudad', [], $pickingPoint->ID ) . " " .
+                            " (CP: ".rwmb_get_value( 'codigo_postal', [], $pickingPoint->ID ) . "), " .
+                            rwmb_get_value( 'provincia', [], $pickingPoint->ID ),
                         'cost'        => $cost,
                         'description' => "La dirección",
                         'taxes'       => $tax_rate,
